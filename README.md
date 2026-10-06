@@ -1,5 +1,7 @@
 # fcitx5-cloudsecond
 
+[![License](https://img.shields.io/github/license/GeojoL/fcitx5-cloudsecond)](LICENSE) [![Release](https://img.shields.io/github/v/release/GeojoL/fcitx5-cloudsecond)](https://github.com/GeojoL/fcitx5-cloudsecond/releases)
+
 **fcitx5 拼音插件：让前两个候选都来自云端（百度）。** fcitx5 自带的云拼音只用百度返回的第一个结果；本插件把百度的第二个结果放在第 2 位，本地候选从第 3 位开始。
 
 ![效果](docs/demo.png)
@@ -32,11 +34,25 @@
 
 ## 前提
 
-需要 fcitx5 拼音的云拼音这样设置（fcitx5 设置 → 拼音 / 云拼音）：
+fcitx5 拼音的云拼音需要这样设置：
 
-- 启用云拼音（`CloudPinyinEnabled=True`）
-- 云拼音后端选 **Baidu**
-- 云拼音候选位置为 **1**（`CloudPinyinIndex=1`）
+| 配置文件 | 设置 |
+|---|---|
+| `~/.config/fcitx5/conf/pinyin.conf` | `CloudPinyinEnabled=True`（启用云拼音）、`CloudPinyinIndex=1`（云候选排第 1） |
+| `~/.config/fcitx5/conf/cloudpinyin.conf` | `Backend=Baidu`（后端用百度） |
+
+可以在 **fcitx5 运行时**执行下面这段命令一次设好，立即生效，不用重启：
+
+```bash
+mkdir -p ~/.config/fcitx5/conf && cd ~/.config/fcitx5/conf
+touch pinyin.conf cloudpinyin.conf
+{ printf 'CloudPinyinEnabled=True\nCloudPinyinIndex=1\n'; grep -v -E '^(CloudPinyinEnabled|CloudPinyinIndex)=' pinyin.conf || true; } > pinyin.conf.new
+{ echo 'Backend=Baidu'; grep -v '^Backend=' cloudpinyin.conf || true; } > cloudpinyin.conf.new
+mv pinyin.conf.new pinyin.conf && mv cloudpinyin.conf.new cloudpinyin.conf
+for a in pinyin cloudpinyin; do busctl --user call org.fcitx.Fcitx5 /controller org.fcitx.Fcitx.Controller1 ReloadAddonConfig s $a; done
+```
+
+注意：fcitx5 退出时会把内存里的设置写回这两个文件。所以不要在 fcitx5 停止时手改，否则改动会被覆盖；用上面的命令（改完立即让 fcitx5 重新读取）就没有这个问题。这段命令已实测：从全新的默认配置开始执行，立即生效，fcitx5 退出后设置仍然保留。
 
 **隐私**：输入的拼音会发送给百度。fcitx5 自带的云拼音已经在发；本插件会再单独请求一次，所以每次打字会向百度发两次请求。
 
@@ -87,5 +103,6 @@ for the same pinyin and puts the second result at position 2, so the first two
 candidates come from the cloud and local candidates start from position 3. It
 waits until the regular cloud candidate is filled, so a fast Space still commits
 the local best guess. Requires cloud pinyin enabled with the Baidu backend and
-`CloudPinyinIndex=1`. The typed pinyin is sent to Baidu. Tested on Bazzite
+`CloudPinyinIndex=1` (see the shell snippet under 「前提」, which sets them
+while fcitx5 is running). The typed pinyin is sent to Baidu. Tested on Bazzite
 (Fedora 44) with fcitx5 5.1.22; other setups are untested.
