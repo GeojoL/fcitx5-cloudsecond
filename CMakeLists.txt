@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.16)
+project(fcitx5-cloudsecond VERSION 0.0.1 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+find_package(Fcitx5Core 5.1.12 REQUIRED)
+find_package(Fcitx5ModuleCloudPinyin REQUIRED)
+find_package(CURL REQUIRED)
+find_package(nlohmann_json REQUIRED)
+add_library(cloudsecond MODULE cloudsecond.cpp)
+target_link_libraries(cloudsecond Fcitx5::Core Fcitx5::Module::CloudPinyin
+                      CURL::libcurl nlohmann_json::nlohmann_json)
+set_target_properties(cloudsecond PROPERTIES PREFIX "")

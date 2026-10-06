@@ -1,0 +1,8 @@
+[Addon]
+Name=Cloud Second Candidate
+Category=Module
+Version=0.0.1
+Library=@LIBDIR@/cloudsecond
+Type=SharedLibrary
+OnDemand=False
+Configurable=False
